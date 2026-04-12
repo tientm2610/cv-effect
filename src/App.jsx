@@ -1,15 +1,36 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, 
+  Phone, 
   Eye, 
   ExternalLink,
   ChevronDown,
   Code2,
   Database,
   Layout,
-  Server
+  Server,
+  Settings,
+  GitBranch,
+  FileCode,
+  Layers,
+  Zap,
+  Shield,
+  Terminal,
+  Package,
+  Cpu,
+  HardDrive,
+  Globe,
+  Users,
+  BookOpen,
+  Award,
+  MapPin,
+  Calendar,
+  Briefcase,
+  GraduationCap
 } from 'lucide-react';
+
+import CVPDF from './assets/TranManhTien_CV.pdf';
 
 const Github = ({ size = 24, className = "" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -45,324 +66,731 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2
+      staggerChildren: 0.1
     }
   }
 };
 
-const CV_LINK = "https://github.com/tientm2610/CV/blob/main/TranManhTien_CV.pdf";
+const floatAnimation = {
+  y: [-10, 10, -10],
+  transition: {
+    repeat: Infinity,
+    duration: 3,
+    ease: "easeInOut"
+  }
+};
 
-export default function App() {
+const glowAnimation = {
+  boxShadow: ['0 0 20px rgba(6,182,212,0.3)', '0 0 40px rgba(6,182,212,0.6)', '0 0 20px rgba(6,182,212,0.3)'],
+  transition: {
+    repeat: Infinity,
+    duration: 2,
+    ease: "easeInOut"
+  }
+};
+
+const techIcons = [
+  { icon: Code2, label: 'ReactJS', color: 'text-cyan-400' },
+  { icon: Server, label: 'Java', color: 'text-orange-500' },
+  { icon: Layers, label: 'Spring', color: 'text-green-500' },
+  { icon: Database, label: 'MySQL', color: 'text-blue-500' }
+];
+
+const skills = {
+  frontend: ['ReactJS', 'HTML', 'CSS', 'JavaScript (ES6+)', 'Redux Toolkit', 'Ant Design', 'Bootstrap'],
+  backend: ['RESTful API', 'Servlet & JSP', 'Java Core', 'Spring Framework', 'Spring Security', 'Spring Data JPA', 'JWT Authentication' , 'ExpressJS'],
+  tools: ['Git', 'Postman', 'Figma', 'Webpack', 'Maven',]
+};
+
+const projects = [
+  {
+    title: 'Learning Management System',
+    subtitle: 'Role: Frontend Developer',
+    description: 'Comprehensive e-learning platform with dynamic course engine, anti-cheating mechanisms, and SCORM support for enterprise education.',
+    fe: ['ReactJS', 'JavaScript', 'Redux Toolkit', 'Ant Design', 'Axios'],
+    be: ['PHP (Laravel)', 'SQL Server', 'RESTful APIs'],
+    gradient: 'from-cyan-500 to-blue-600',
+    accent: 'cyan'
+  },
+  {
+    title: 'Mentor & Coaching System',
+    subtitle: 'Role: Fullstack Developer',
+    description: 'Fullstack ownership platform with OAuth2/RBAC security and intelligent mentor-student matching logic for career development.',
+    fe: ['ReactJS', 'JavaScript', 'Redux Toolkit', 'Ant Design', 'Axios'],
+    be: ['Java', 'Spring Boot', 'Spring Security (OAuth2)', 'RESTful APIs', 'DTOs Pattern', 'MySQL'],
+    gradient: 'from-purple-500 to-pink-600',
+    accent: 'purple'
+  }
+];
+
+const clients = [
+  { name: 'ABBANK', color: 'bg-green-500' },
+  { name: 'VUS', color: 'bg-cyan-500' },
+  { name: 'HOASEN GROUP', color: 'bg-amber-500' },
+  { name: 'Dai-ichi Life', color: 'bg-blue-500' }
+];
+
+const socialLinks = [
+  { icon: Linkedin, href: 'https://www.linkedin.com/in/manh-tien-tran-462956292/', label: 'LinkedIn' },
+  { icon: Github, href: 'https://github.com/tientm2610', label: 'GitHub' },
+  { icon: Mail, href: 'mailto:t.manh.tien2610@gmail.com', label: 'Email' }
+];
+
+function App() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCV, setShowCV] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const openCV = () => setShowCV(true);
+  const closeCV = () => setShowCV(false);
+
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      setMobileMenuOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-dark text-gray-200 font-sans selection:bg-cyan-500/30">
       
-      {/* 🚀 Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 glass-card px-6 py-4 flex justify-between items-center border-b-0 border-white/5">
-        <h1 className="text-xl font-bold tracking-tight text-white border-l-2 border-cyan-400 pl-3">
-          TMT<span className="text-cyan-400">.</span>
-        </h1>
-        <div className="flex gap-4">
-          <a href="#about" className="hover:text-cyan-400 transition-colors text-sm font-medium">About</a>
-          <a href="#experience" className="hover:text-cyan-400 transition-colors text-sm font-medium">Experience</a>
-          <a href="#projects" className="hover:text-cyan-400 transition-colors text-sm font-medium">Projects</a>
-        </div>
-      </nav>
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)]" />
+      </div>
 
-      {/* 🟢 HERO SECTION */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.1)_0%,transparent_70%)] pointer-events-none" />
+      {/* Sticky Navigation */}
+      <motion.nav 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          scrolled 
+            ? 'glass-nav bg-dark/80 backdrop-blur-lg border-b border-white/5' 
+            : 'bg-transparent'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="text-xl font-bold tracking-tight text-white cursor-pointer"
+              onClick={() => window.scrollTo({top: 0,behavior: 'smooth'})}
+            >
+              <span className="text-cyan-400">Tien</span>tm<span className="text-cyan-400">.</span>
+            </motion.div>
+
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-8">
+              {['About', 'Experience', 'Skills', 'Projects', 'Contact'].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => scrollToSection(item.toLowerCase())}
+                  className="text-sm font-medium text-gray-400 hover:text-cyan-400 transition-colors relative group"
+                >
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 transition-all group-hover:w-full" />
+                </button>
+              ))}
+              <motion.button
+                onClick={openCV}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-glow"
+              >
+                <Eye size={16} />
+                View CV
+              </motion.button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-gray-400 hover:text-white"
+            >
+              <div className="space-y-1.5">
+                <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+                <span className={`block w-6 h-0.5 bg-current transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
+                <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden glass-nav border-t border-white/5"
+            >
+              <div className="px-4 py-4 space-y-3">
+                {['About', 'Experience', 'Skills', 'Projects', 'Contact'].map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => scrollToSection(item.toLowerCase())}
+                    className="block w-full text-left text-gray-300 hover:text-cyan-400 py-2"
+                  >
+                    {item}
+                  </button>
+                ))}
+                <button
+                  onClick={openCV}
+                  className="flex items-center gap-2 bg-cyan-500 text-dark px-4 py-2 rounded-lg font-semibold text-sm"
+                >
+                  <Eye size={16} />
+                  View Full CV
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center px-4 pt-20 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.08)_0%,transparent_70%)] pointer-events-none" />
         
+        {/* Floating Tech Icons */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {techIcons.map((tech, index) => (
+            <motion.div
+              key={tech.label}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 0.15, scale: 1 }}
+              transition={{ delay: 0.5 + index * 0.2, duration: 0.8 }}
+              className={`absolute ${[
+                'left-[10%] top-[20%]',
+                'right-[15%] top-[25%]',
+                'left-[20%] bottom-[25%]',
+                'right-[10%] bottom-[20%]'
+              ][index]}`}
+            >
+              <tech.icon className={`${tech.color}`} size={48} />
+            </motion.div>
+          ))}
+        </div>
+
         <motion.div 
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
-          className="max-w-4xl w-full mx-auto relative z-10 text-center"
+          className="max-w-5xl mx-auto relative z-10 text-center"
         >
-          <motion.div variants={fadeInUp} className="inline-block mb-4 px-4 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-400 text-sm font-medium tracking-wide">
-            FULLSTACK DEVELOPER
+          <motion.div variants={fadeInUp} className="mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-400 text-sm font-medium tracking-wide">
+              <Zap size={14} />
+              Fullstack Developer
+            </span>
           </motion.div>
           
-          <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
-            Architecting <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">
-              Scalable Solutions.
+          <motion.h1 
+            variants={fadeInUp}
+            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight"
+          >
+            Engineering Scalable
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-300 to-blue-500">
+              Solutions for Leading Enterprises.
             </span>
           </motion.h1>
 
-          <motion.p variants={fadeInUp} className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-            Hi, I'm <span className="text-white font-semibold">TRAN MANH TIEN</span>. 
-            I build enterprise-grade web applications with ReactJS & Java Spring Boot.
+          <motion.p 
+            variants={fadeInUp}
+            className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed"
+          >
+            Specializing in <span className="text-cyan-400 font-medium">ReactJS Expert-level architecture</span> & 
+            <span className="text-cyan-400 font-medium"> Java Spring Boot backends</span> for enterprise-level applications.
           </motion.p>
           
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a 
-              href={CV_LINK}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-8 py-3.5 rounded-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <motion.button
+              onClick={openCV}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-8 py-3.5 rounded-xl font-bold transition-all shadow-glow"
             >
               <Eye size={20} />
-              View my CV
-            </a>
-            <a href="#projects" className="flex items-center gap-2 px-8 py-3.5 rounded-lg font-medium border border-gray-600 hover:border-cyan-400 hover:text-cyan-400 transition-all">
-              View My Work
-            </a>
+              View My Full CV
+            </motion.button>
+            <motion.button
+              onClick={() => scrollToSection('experience')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-medium border border-white/20 hover:border-cyan-400 hover:text-cyan-400 transition-all"
+            >
+              Explore My Work
+            </motion.button>
           </motion.div>
           
-          {/* Floating UI element */}
+          {/* Stats */}
           <motion.div 
-            animate={{ y: [0, -10, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-            className="mt-20 flex justify-center text-gray-500"
+            variants={fadeInUp}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto"
           >
-            <ChevronDown size={32} />
+            {[
+              { label: 'Years Exp.', value: '2+' },
+              { label: 'Enterprises', value: '4+' },
+              { label: 'Systems', value: '2+' },
+              { label: 'GPA', value: '3.13' }
+            ].map((stat, i) => (
+              <div key={stat.label} className="glass-card p-4 rounded-xl">
+                <p className="text-2xl font-bold text-white">{stat.value}</p>
+                <p className="text-xs text-gray-500">{stat.label}</p>
+              </div>
+            ))}
+          </motion.div>
+          
+          {/* Scroll Indicator */}
+          <motion.div 
+            animate={{ y: [0, 10, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="mt-16"
+          >
+            <ChevronDown className="mx-auto text-gray-500" size={32} />
           </motion.div>
         </motion.div>
       </section>
 
-      {/* 🧠 ABOUT & SKILLS SECTION */}
-      <section id="about" className="py-24 px-4 bg-charcoal/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={fadeInUp}
-            >
-              <h2 className="text-3xl font-bold mb-6 text-white flex items-center gap-3">
-                <span className="w-10 h-[2px] bg-cyan-400 inline-block"></span>
-                About Me
-              </h2>
-              <div className="space-y-4 text-gray-400 leading-relaxed text-lg">
+      {/* About Section */}
+      <section id="about" className="py-24 px-4 bg-charcoal/30 relative">
+        <div className="max-w-4xl mx-auto relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">About Me</h2>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="glass-card p-8 rounded-2xl"
+          >
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-4 text-gray-400">
                 <p>
-                  I'm a passionate developer based in Ho Chi Minh City with over <strong className="text-white">2+ years of experience</strong> building enterprise-level systems for domains like Banking & Education (including ABBANK, VUS, and Dai-ichi Life).
+                  I'm a <span className="text-white font-semibold">Fullstack Developer</span> with 2+ years of experience building enterprise-level applications for Banking, Education, and Corporate sectors.
                 </p>
                 <p>
-                  Having successfully transitioned from a <strong className="text-cyan-400">Frontend Expert</strong> to a comprehensive <strong className="text-cyan-400">Fullstack Developer</strong>, I specialize in bridging the gap between highly interactive user interfaces and robust, secure backend architectures.
+                  My technical philosophy focuses on <span className="text-cyan-400">clean code</span>, <span className="text-cyan-400">system-wide perspective</span>, and <span className="text-cyan-400">high-performance server-side solutions</span>.
                 </p>
-                <div className="pt-4 flex gap-6">
-                  <div className="glass-card p-4 rounded-xl border-l-4 border-l-cyan-400">
-                    <p className="text-3xl font-bold text-white mb-1">3.13</p>
-                    <p className="text-sm">GPA | Gia Dinh University</p>
+                <p>
+                  Currently seeking opportunities to architect scalable solutions for leading enterprises.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-gray-400">
+                  <GraduationCap className="text-cyan-400" size={20} />
+                  <div>
+                    <p className="text-white font-medium">Gia Dinh University</p>
+                    <p className="text-sm">GPA: 3.13</p>
                   </div>
-                  <div className="glass-card p-4 rounded-xl border-l-4 border-l-blue-500">
-                    <p className="text-3xl font-bold text-white mb-1">2+</p>
-                    <p className="text-sm">Years Experience</p>
+                </div>
+                <div className="flex items-center gap-3 text-gray-400">
+                  <MapPin className="text-cyan-400" size={20} />
+                  <div>
+                    <p className="text-white font-medium">Ho Chi Minh City, Vietnam</p>
+                    <p className="text-sm">Available for relocation</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-gray-400">
+                  <Mail className="text-cyan-400" size={20} />
+                  <div>
+                    <p className="text-white font-medium">t.manh.tien2610@gmail.com</p>
+                    <p className="text-sm">0785174058</p>
                   </div>
                 </div>
               </div>
-            </motion.div>
-
-            {/* Skill Cloud */}
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-              className="grid gap-4"
-            >
-              <motion.div variants={fadeInUp} className="glass-card p-6 rounded-2xl hover:border-cyan-400/50 transition-colors group">
-                <div className="flex items-center gap-3 mb-4">
-                  <Code2 className="text-cyan-400" />
-                  <h3 className="text-xl font-bold text-white">Languages</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {['Java', 'JavaScript', 'TypeScript', 'SQL'].map(skill => (
-                    <span key={skill} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-sm group-hover:border-cyan-400/30 transition-colors">{skill}</span>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div variants={fadeInUp} className="glass-card p-6 rounded-2xl hover:border-blue-400/50 transition-colors group">
-                <div className="flex items-center gap-3 mb-4">
-                  <Server className="text-blue-400" />
-                  <h3 className="text-xl font-bold text-white">Backend Arch</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {['Spring Boot', 'Spring Security', 'OAuth2', 'RESTful APIs', 'Microservices'].map(skill => (
-                    <span key={skill} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-sm group-hover:border-blue-400/30 transition-colors">{skill}</span>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div variants={fadeInUp} className="glass-card p-6 rounded-2xl hover:border-purple-400/50 transition-colors group">
-                <div className="flex items-center gap-3 mb-4">
-                  <Layout className="text-purple-400" />
-                  <h3 className="text-xl font-bold text-white">Frontend Ecosystem</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {['ReactJS', 'Redux Toolkit', 'Tailwind CSS', 'Ant Design', 'Framer Motion'].map(skill => (
-                    <span key={skill} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-sm group-hover:border-purple-400/30 transition-colors">{skill}</span>
-                  ))}
-                </div>
-              </motion.div>
-
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ⏳ EXPERIENCE TIMELINE */}
+
+      {/* Experience Section */}
       <section id="experience" className="py-24 px-4 relative">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-900/20 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl font-bold mb-16 text-center text-white"
+            className="text-3xl sm:text-4xl font-bold mb-4 text-center text-white"
           >
             Professional Experience
           </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-gray-400 text-center mb-16 max-w-xl mx-auto"
+          >
+            Building enterprise solutions for leading organizations in Vietnam
+          </motion.p>
 
-          <div className="space-y-12 border-l-2 border-cyan-400/30 ml-4 md:ml-0 md:pl-0">
-            
+          {/* Timeline */}
+          <div className="relative">
+            <div className="absolute left-4 sm:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-purple-500/50 to-transparent" />
+
+            {/* I Techco */}
             <motion.div 
-              initial="hidden"
-              whileInView="visible"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              variants={fadeInUp}
-              className="relative md:pl-10 pl-6"
+              className="relative pl-10 sm:pl-0 mb-12"
             >
-              <div className="absolute w-4 h-4 bg-cyan-400 rounded-full -left-[9px] top-2 shadow-[0_0_10px_rgba(6,182,212,0.8)] border-2 border-dark"></div>
-              <div className="glass-card p-8 rounded-2xl neon-border hover:bg-white/[0.02] transition-colors">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+              <div className="sm:absolute sm:left-1/2 sm:-translate-x-2 sm:mt-3">
+                <div className="w-4 h-4 bg-cyan-400 rounded-full shadow-glow ring-4 ring-dark" />
+              </div>
+              <div className="glass-card p-6 sm:p-8 rounded-2xl sm:mr-8 hover:border-cyan-400/30 transition-colors group">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
                   <div>
-                    <h3 className="text-2xl font-bold text-white">I TECHCO</h3>
-                    <p className="text-cyan-400 font-medium">Fullstack Developer</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-cyan-400 transition-colors">
+                      I TECHCO - VIETNAM
+                    </h3>
+                    <p className="text-cyan-400 font-medium">Frontend Developer</p>
                   </div>
-                  <span className="text-gray-500 text-sm mt-2 md:mt-0 bg-dark px-3 py-1 rounded-full border border-gray-800">Present</span>
+                  <span className="text-gray-500 text-sm bg-dark/50 px-3 py-1 rounded-full border border-white/10 self-start">
+                    Aug 2024 - Feb 2026
+                  </span>
                 </div>
                 <ul className="space-y-3 text-gray-400">
-                  <li className="flex gap-2">
-                    <span className="text-cyan-400 mt-1">▹</span>
-                    <span>Spearheaded the <strong>Technical Leadership</strong> for critical frontend architectures, transitioning complex monolithic patterns to modern, scalable React paradigms.</span>
+                  <li className="flex gap-3">
+                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
+                    <span>Starting as a <strong className="text-white">Frontend Developer</strong> I continuously learned and sharpened my technical skills, eventually taking on team lead
+responsibilities in company projects.</span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-cyan-400 mt-1">▹</span>
-                    <span>Led massive <strong>Optimization</strong> efforts, introducing robust Code Splitting, dynamic imports, and WebSockets to drastically reduce LCP and TTI across enterprise portals.</span>
+                  <li className="flex gap-3">
+                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
+                    <span>Designed and developed <strong className="text-white">administrative dashboards</strong> featuring <strong className="text-white">complex charts</strong> and reporting systems.</span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-cyan-400 mt-1">▹</span>
-                    <span>Architected end-to-end features integrating secure Java Spring Boot microservices with high-performance React user interfaces.</span>
+                  <li className="flex gap-3">
+                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
+                    <span>Optimized performance with <strong className="text-white">Code Splitting</strong> & <strong className="text-white">Lazy Loading</strong> for 40% faster load times.</span>
                   </li>
+                  <li className="flex gap-3">
+                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
+                    <span>Acted as a bridge between UI/UX and Backend teams to ensure seamless API integration and
+optimized data flow for production-grade applications.</span>
+                  </li>
+                  
                 </ul>
+                <div className="mt-4 pt-4 border-t border-white/5">
+                  <p className="text-xs text-gray-500 mb-2">Key Clients:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {clients.map((client) => (
+                      <span key={client.name} className="text-xs font-medium px-3 py-1 bg-dark rounded-full border border-white/10 text-gray-300">
+                        {client.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </motion.div>
-            
+
+            {/* Earlier Experience */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative pl-10 sm:pl-0"
+            >
+              <div className="sm:absolute sm:left-1/2 sm:-translate-x-2 sm:mt-3">
+                <div className="w-4 h-4 bg-blue-500 rounded-full shadow-glow ring-4 ring-dark" />
+              </div>
+              <div className="glass-card p-6 sm:p-8 rounded-2xl sm:ml-8 hover:border-blue-500/30 transition-colors group">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                      Currently seeking for new opportunities and more challenges.
+                    </h3>
+                    <p className="text-blue-400 font-medium">Fullstack Developer</p>
+                  </div>
+                  <span className="text-gray-500 text-sm bg-dark/50 px-3 py-1 rounded-full border border-white/10 self-start">
+                    ???
+                  </span>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* 💻 FEATURED PROJECTS */}
+      {/* Skills Section */}
+      <section id="skills" className="py-24 px-4 relative">
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl font-bold mb-16 text-center text-white"
+          >
+            Technical Skill Vault
+          </motion.h2>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { title: 'Frontend', icon: Layout, skills: skills.frontend, color: 'cyan', gradient: 'from-cyan-500/20 to-transparent' },
+              { title: 'Backend', icon: Server, skills: skills.backend, color: 'orange', gradient: 'from-orange-500/20 to-transparent' },
+              { title: 'Tools & Others', icon: Settings, skills: skills.tools, color: 'purple', gradient: 'from-purple-500/20 to-transparent' }
+            ].map((category, index) => (
+              <motion.div
+                key={category.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="glass-card p-6 rounded-2xl hover:border-white/20 transition-colors group"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity`} />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className={`w-12 h-12 rounded-xl bg-${category.color}-500/20 flex items-center justify-center`}>
+                      <category.icon className={`text-${category.color}-400`} size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">{category.title}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {category.skills.map((skill) => (
+                      <span 
+                        key={skill} 
+                        className="text-sm px-3 py-1.5 bg-dark/50 rounded-lg border border-white/10 text-gray-300 hover:border-white/20 transition-colors"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+      {/* Projects Section */}
       <section id="projects" className="py-24 px-4 bg-charcoal/30 relative">
-        <div className="max-w-6xl mx-auto z-10 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.05)_0%,transparent_70%)]" />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex items-center gap-4 mb-12"
+            className="text-center mb-16"
           >
-            <h2 className="text-3xl font-bold text-white">Featured Projects</h2>
-            <div className="h-[1px] flex-1 bg-gradient-to-r from-cyan-400/50 to-transparent"></div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Projects Showcase</h2>
+            <p className="text-gray-400 max-w-xl mx-auto">
+              Enterprise-grade applications built with modern technologies and best practices
+            </p>
           </motion.div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            
-            {/* Project 1 */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="glass-card rounded-2xl overflow-hidden group"
-            >
-              <div className="h-48 bg-gray-800/50 flex items-center justify-center p-6 border-b border-white/5 relative overflow-hidden">
-                <div className="absolute inset-0 bg-cyan-500/10 group-hover:bg-cyan-500/20 transition-colors"></div>
-                <Database className="w-20 h-20 text-cyan-400/50 group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="p-8">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-2xl font-bold text-white group-hover:text-cyan-400 transition-colors">E-learning Platform</h3>
-                  <ExternalLink className="text-gray-500 hover:text-white cursor-pointer" size={20} />
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="group"
+              >
+                <div className="glass-card rounded-2xl overflow-hidden hover:border-white/20 transition-all hover:shadow-glow">
+                  {/* Project Header */}
+                  <div className={`h-48 bg-gradient-to-br ${project.gradient} relative p-8 flex items-end`}>
+                    <div className="absolute inset-0 bg-black/30" />
+                    <div className="relative z-10">
+                      <p className="text-white/80 text-sm font-medium mb-1">{project.subtitle}</p>
+                      <h3 className="text-2xl font-bold text-white">{project.title}</h3>
+                    </div>
+                    <ExternalLink className="absolute top-6 right-6 text-white/60 group-hover:text-white transition-colors" size={24} />
+                  </div>
+                  
+                  {/* Project Content */}
+                  <div className="p-6 sm:p-8">
+                    <p className="text-gray-400 mb-6 leading-relaxed">
+                      {project.description}
+                    </p>
+                              <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <h2 className="text-cyan-400 font-medium mb-4">Tech stack</h2>
+          </motion.div>
+                    <h5 className="text-1xl sm:text-2xl font-bold text-white my-4">Frontend</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {project.fe.map((tag) => (
+                        <span 
+                          key={tag} 
+                          className={`text-xs font-mono px-3 py-1.5 bg-dark rounded-lg border border-${project.accent}-400/20 text-${project.accent}-400`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <h5 className="text-1xl sm:text-2xl font-bold text-white my-4">Backend</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {project.be.map((tag) => (
+                        <span 
+                          key={tag} 
+                          className={`text-xs font-mono px-3 py-1.5 bg-dark rounded-lg border border-${project.accent}-400/20 text-${project.accent}-400`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <p className="text-gray-400 mb-6 leading-relaxed">
-                  A comprehensive educational platform featuring an <strong>Advanced Examination System</strong>. Implemented strict anti-cheating mechanisms using browser API heuristics and secure WebSocket feeds to ensure integrity during remote evaluations.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-auto">
-                  <span className="text-xs font-mono px-2 py-1 bg-dark rounded border border-cyan-400/20 text-cyan-400">ReactJS</span>
-                  <span className="text-xs font-mono px-2 py-1 bg-dark rounded border border-cyan-400/20 text-cyan-400">Spring Boot</span>
-                  <span className="text-xs font-mono px-2 py-1 bg-dark rounded border border-cyan-400/20 text-cyan-400">WebSockets</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Project 2 */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="glass-card rounded-2xl overflow-hidden group"
-            >
-              <div className="h-48 bg-gray-800/50 flex items-center justify-center p-6 border-b border-white/5 relative overflow-hidden">
-                <div className="absolute inset-0 bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors"></div>
-                <Layout className="w-20 h-20 text-blue-400/50 group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="p-8">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">Mentor & Coaching System</h3>
-                  <ExternalLink className="text-gray-500 hover:text-white cursor-pointer" size={20} />
-                </div>
-                <p className="text-gray-400 mb-6 leading-relaxed">
-                  A high-availability portal connecting mentors with mentees. Drove the <strong>Fullstack Implementation</strong> integrating robust <strong>OAuth2 Security</strong> flows to manage permissions cleanly across varying user roles and organizations.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs font-mono px-2 py-1 bg-dark rounded border border-blue-400/20 text-blue-400">OAuth2</span>
-                  <span className="text-xs font-mono px-2 py-1 bg-dark rounded border border-blue-400/20 text-blue-400">Java</span>
-                  <span className="text-xs font-mono px-2 py-1 bg-dark rounded border border-blue-400/20 text-blue-400">REST APIs</span>
-                </div>
-              </div>
-            </motion.div>
-
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 📬 FOOTER / CONTACT */}
-      <footer className="py-12 border-t border-white/10 relative overflow-hidden">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-32 bg-cyan-500/10 blur-[100px] pointer-events-none" />
+      {/* Contact Section */}
+      <section id="contact" className="py-24 px-4 relative">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-40 bg-cyan-500/5 blur-[100px] pointer-events-none" />
         
-        <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-2xl font-bold text-white mb-8">Let's Connect</h2>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl font-bold mb-6 text-white"
+          >
+            Let's Connect
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-gray-400 mb-10"
+          >
+            Open to new opportunities and collaborations
+          </motion.p>
           
-          <div className="flex justify-center gap-6 mb-8 text-gray-400">
-            <a href="https://github.com/tientm2610" target="_blank" rel="noreferrer" className="hover:text-cyan-400 hover:scale-110 transition-all">
-              <Github size={28} />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex justify-center flex-wrap gap-4 mb-12"
+          >
+            {socialLinks.map((social) => (
+              <motion.a
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noreferrer"
+                whileHover={{ scale: 1.1, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-14 h-14 glass-card rounded-xl flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-400/30 transition-all"
+                title={social.label}
+              >
+                <social.icon size={24} />
+              </motion.a>
+            ))}
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-6 text-gray-500"
+          >
+            <a href="mailto:t.manh.tien2610@gmail.com" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
+              <Mail size={18} />
+              t.manh.tien2610@gmail.com
             </a>
-            <a href="https://www.linkedin.com/in/manh-tien-tran-462956292/" target="_blank" rel="noreferrer" className="hover:text-blue-500 hover:scale-110 transition-all">
-              <Linkedin size={28} />
+            <a href="tel:0785174058" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
+              <Phone size={18} />
+              0785174058
             </a>
-            <a href="https://www.facebook.com/butmapiachay567/" target="_blank" rel="noreferrer" className="hover:text-blue-400 hover:scale-110 transition-all">
-              <Facebook size={28} />
-            </a>
-            <a href="https://www.instagram.com/tientm_" target="_blank" rel="noreferrer" className="hover:text-pink-500 hover:scale-110 transition-all">
-              <Instagram size={28} />
-            </a>
-            <a href="mailto:t.manh.tien2610@gmail.com" className="hover:text-cyan-400 hover:scale-110 transition-all">
-              <Mail size={28} />
-            </a>
-          </div>
-          
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 border-t border-white/10 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 text-center">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Tran Manh Tien. Architecting Scalable Solutions.
+            © {new Date().getFullYear()} Tran Manh Tien. Built with React, Tailwind CSS & Framer Motion.
           </p>
         </div>
       </footer>
 
+      {/* CV Modal Popup */}
+      <AnimatePresence>
+        {showCV && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={closeCV}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full max-w-5xl h-[90vh] bg-dark rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-charcoal/80">
+                <h3 className="text-lg font-bold text-white">Tran Manh Tien - CV</h3>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={CVPDF}
+                    download="TranManhTien_CV.pdf"
+                    className="text-sm text-gray-400 hover:text-cyan-400 transition-colors flex items-center gap-2"
+                  >
+                    <ExternalLink size={16} />
+                    Download
+                  </a>
+                  <button
+                    onClick={closeCV}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-gray-400 hover:text-white transition-all"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              {/* PDF Viewer */}
+              <div className="h-[calc(100%-65px)]">
+                <iframe
+                  src={`${CVPDF}#toolbar=0&navpanes=0&scrollbar=0`}
+                  className="w-full h-full"
+                  title="CV Preview"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+export default App;
