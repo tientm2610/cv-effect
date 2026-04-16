@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, 
@@ -29,7 +29,8 @@ import {
   Briefcase,
   GraduationCap
 } from 'lucide-react';
-
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Text, Float, Sparkles, MeshDistortMaterial } from '@react-three/drei'
 import CVPDF from './assets/TranManhTien_CV.pdf';
 
 const Github = ({ size = 24, className = "" }) => (
@@ -55,6 +56,54 @@ const Instagram = ({ size = 24, className = "" }) => (
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
   </svg>
 );
+
+function Particles() {
+  return (
+    <Sparkles
+      count={200}
+      scale={12}
+      size={4}
+      speed={0.5}
+      color="#A78BFA"
+      opacity={0.8}
+    />
+  )
+}
+
+
+
+function Scene() {
+  return (
+    <>
+      <ambientLight intensity={0.3} />
+      <pointLight position={[10, 10, 10]} intensity={1} color="#A78BFA" />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#7C3AED" />
+      <spotLight
+        position={[0, 10, 0]}
+        angle={0.5}
+        penumbra={1}
+        intensity={1}
+        color="#FFFFFF"
+      />
+      <Particles />
+    </>
+  )
+}
+
+const backgroundEffect = () => {
+  return (
+    <Canvas
+      camera={{ position: [0, 0, 6], fov: 50 }}
+      gl={{ antialias: true, alpha: true }}
+    >
+      <color attach="background" args={["#0A0A0F"]} />
+      <fog attach="fog" args={["#0A0A0F", 5, 20]} />
+      <Suspense fallback={null}>
+        <Scene />
+      </Suspense>
+    </Canvas>
+  );
+};
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -162,12 +211,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-dark text-gray-200 font-sans selection:bg-cyan-500/30">
-      
       {/* Background Effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)]" />
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {backgroundEffect()}
       </div>
 
       {/* Sticky Navigation */}
