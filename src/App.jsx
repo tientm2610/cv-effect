@@ -105,6 +105,8 @@ function App() {
           <Footer />
 
           <CVCModal show={showCV} onClose={closeCV} />
+          
+          {!isMobile && <MagneticCursor />}
         </div>
       </SmoothScrollProvider>
     </ThemeProvider>
