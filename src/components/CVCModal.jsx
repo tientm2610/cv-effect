@@ -23,8 +23,8 @@ export function CVModal({ show, onClose }) {
               <h3 className="text-lg font-bold text-white">Tran Manh Tien - CV</h3>
               <div className="flex items-center gap-3">
                 <a
-                  href="/src/assets/TranManhTien_CV.pdf"
-                  download="TranManhTien_CV.pdf"
+                  href="/resume.pdf"
+                  download="resume.pdf"
                   className="text-sm transition-colors flex items-center gap-2 cursor-hover"
                 style={{ color: 'var(--text-secondary)' }}
                 >
@@ -46,7 +46,7 @@ export function CVModal({ show, onClose }) {
             
             <div className="h-[calc(100%-65px)]">
               <iframe
-                src="/src/assets/TranManhTien_CV.pdf#toolbar=0&navpanes=0&scrollbar=0"
+                src="/resume.pdf#toolbar=0&navpanes=0&scrollbar=0"
                 className="w-full h-full"
                 title="CV Preview"
               />
