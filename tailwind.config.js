@@ -7,8 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        dark: '#0a0a0a',
+        dark: '#000000',
         charcoal: '#121212',
+        immersive: {
+          black: '#000000',
+          surface: '#0a0a0a',
+          elevated: '#141414',
+          border: 'rgba(255, 255, 255, 0.08)',
+          subtle: 'rgba(255, 255, 255, 0.05)',
+          muted: 'rgba(255, 255, 255, 0.4)',
+          light: 'rgba(255, 255, 255, 0.6)',
+        },
         cyan: {
           400: '#22d3ee',
           500: '#06b6d4',
@@ -16,7 +25,10 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'Geist', 'sans-serif'],
+      },
+      backdropBlur: {
+        xs: '2px',
       }
     },
   },

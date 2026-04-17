@@ -1,5 +1,8 @@
-import React, { useState, useEffect, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 import { 
   Mail, 
   Phone, 
@@ -12,26 +15,115 @@ import {
   Server,
   Settings,
   GitBranch,
-  FileCode,
   Layers,
   Zap,
-  Shield,
-  Terminal,
-  Package,
-  Cpu,
-  HardDrive,
-  Globe,
-  Users,
-  BookOpen,
-  Award,
-  MapPin,
-  Calendar,
-  Briefcase,
-  GraduationCap
+  GraduationCap,
+  MapPin
 } from 'lucide-react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Text, Float, Sparkles, MeshDistortMaterial } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
+import { Sparkles } from '@react-three/drei'
 import CVPDF from './assets/TranManhTien_CV.pdf';
+
+gsap.registerPlugin(ScrollTrigger);
+
+function CustomCursor() {
+  const cursorRef = useRef(null);
+  const cursorDotRef = useRef(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const cursorX = useSpring(0, { stiffness: 500, damping: 28 });
+  const cursorY = useSpring(0, { stiffness: 500, damping: 28 });
+  const [isHovering, setIsHovering] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const updateCursor = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      if (!isVisible) setIsVisible(true);
+    };
+
+    const handleMouseEnter = () => setIsVisible(true);
+    const handleMouseLeave = () => setIsVisible(false);
+
+    window.addEventListener('mousemove', updateCursor);
+    document.addEventListener('mouseenter', handleMouseEnter);
+    document.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', updateCursor);
+      document.removeEventListener('mouseenter', handleMouseEnter);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [isVisible, mouseX, mouseY]);
+
+  useEffect(() => {
+    const unsubscribeX = cursorX.on('change', (v) => {
+      if (cursorRef.current) cursorRef.current.style.transform = `translate(${v}px, ${cursorY.get()}px)`;
+    });
+    const unsubscribeY = cursorY.on('change', (v) => {
+      if (cursorRef.current) cursorRef.current.style.transform = `translate(${cursorX.get()}px, ${v}px)`;
+    });
+
+    const unsubscribeSpringX = mouseX.on('change', (v) => cursorX.set(v - 20));
+    const unsubscribeSpringY = mouseY.on('change', (v) => cursorY.set(v - 20));
+
+    return () => {
+      unsubscribeX();
+      unsubscribeY();
+      unsubscribeSpringX();
+      unsubscribeSpringY();
+    };
+  }, [cursorX, cursorY, mouseX, mouseY]);
+
+  useEffect(() => {
+    const handleMouseOver = (e) => {
+      const target = e.target;
+      const isInteractive = 
+        target.tagName === 'A' ||
+        target.tagName === 'BUTTON' ||
+        target.closest('a') ||
+        target.closest('button') ||
+        target.classList.contains('cursor-hover') ||
+        target.closest('.cursor-hover');
+      
+      setIsHovering(!!isInteractive);
+    };
+
+    document.addEventListener('mouseover', handleMouseOver);
+    return () => document.removeEventListener('mouseover', handleMouseOver);
+  }, []);
+
+  if (typeof window === 'undefined' || !isVisible) return null;
+
+  return (
+    <>
+      <div
+        ref={cursorRef}
+        className="fixed top-0 left-0 w-10 h-10 rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        style={{
+          willChange: 'transform',
+          background: isHovering ? 'transparent' : 'rgba(255,255,255,0.15)',
+          border: '1px solid rgba(255,255,255,0.5)',
+          backdropFilter: 'blur(2px)',
+          transform: 'translate(-20px, -20px)',
+          transition: 'width 0.3s, height 0.3s, background 0.3s',
+          width: isHovering ? '60px' : '20px',
+          height: isHovering ? '60px' : '20px',
+          opacity: isVisible ? 1 : 0
+        }}
+      />
+      <div
+        ref={cursorDotRef}
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-white rounded-full pointer-events-none z-[9999]"
+        style={{
+          willChange: 'transform',
+          transform: `translate(${mouseX.get() - 4}px, ${mouseY.get() - 4}px)`
+        }}
+      />
+    </>
+  );
+}
 
 const Github = ({ size = 24, className = "" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -42,18 +134,6 @@ const Github = ({ size = 24, className = "" }) => (
 const Linkedin = ({ size = 24, className = "" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
-  </svg>
-);
-
-const Facebook = ({ size = 24, className = "" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-  </svg>
-);
-
-const Instagram = ({ size = 24, className = "" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
   </svg>
 );
 
@@ -70,7 +150,82 @@ function Particles() {
   )
 }
 
+function GradientBlobs() {
+  const blob1Ref = useRef(null);
+  const blob2Ref = useRef(null);
+  const blob3Ref = useRef(null);
 
+  useGSAP(() => {
+    const moveBlob = (blob, delay) => {
+      gsap.to(blob, {
+        x: 'random(-100, 100, 20)',
+        y: 'random(-50, 50, 20)',
+        duration: 8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay
+      });
+    };
+
+    if (blob1Ref.current) moveBlob(blob1Ref.current, 0);
+    if (blob2Ref.current) moveBlob(blob2Ref.current, 2);
+    if (blob3Ref.current) moveBlob(blob3Ref.current, 4);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      <div
+        ref={blob1Ref}
+        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full opacity-30 blur-[150px] will-change-transform"
+        style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)' }}
+      />
+      <div
+        ref={blob2Ref}
+        className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full opacity-25 blur-[120px] will-change-transform"
+        style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)' }}
+      />
+      <div
+        ref={blob3Ref}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-20 blur-[100px] will-change-transform"
+        style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.3) 0%, transparent 70%)' }}
+      />
+    </div>
+  );
+}
+
+function AnimatedBlobSection() {
+  const sectionRef = useRef(null);
+
+  useGSAP(() => {
+    if (!sectionRef.current) return;
+
+    const blob = sectionRef.current.querySelector('.section-blob');
+    gsap.fromTo(blob,
+      { scale: 0.8, opacity: 0 },
+      {
+        scale: 1,
+        opacity: 0.4,
+        duration: 1.5,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 70%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  }, []);
+
+  return (
+    <div ref={sectionRef} className="section-blob-container relative">
+      <div
+        className="section-blob absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none transition-colors duration-1000"
+        style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)' }}
+      />
+    </div>
+  );
+}
 
 function Scene() {
   return (
@@ -105,101 +260,777 @@ const backgroundEffect = () => {
   );
 };
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const floatAnimation = {
-  y: [-10, 10, -10],
-  transition: {
-    repeat: Infinity,
-    duration: 3,
-    ease: "easeInOut"
-  }
-};
-
-const glowAnimation = {
-  boxShadow: ['0 0 20px rgba(6,182,212,0.3)', '0 0 40px rgba(6,182,212,0.6)', '0 0 20px rgba(6,182,212,0.3)'],
-  transition: {
-    repeat: Infinity,
-    duration: 2,
-    ease: "easeInOut"
-  }
-};
-
-const techIcons = [
-  { icon: Code2, label: 'ReactJS', color: 'text-cyan-400' },
-  { icon: Server, label: 'Java', color: 'text-orange-500' },
-  { icon: Layers, label: 'Spring', color: 'text-green-500' },
-  { icon: Database, label: 'MySQL', color: 'text-blue-500' }
-];
-
-const skills = {
-  frontend: ['ReactJS', 'HTML', 'CSS', 'JavaScript (ES6+)', 'Redux Toolkit', 'Ant Design', 'Bootstrap'],
-  backend: ['RESTful API', 'Servlet & JSP', 'Java Core', 'Spring Framework', 'Spring Security', 'Spring Data JPA', 'JWT Authentication' , 'ExpressJS'],
-  tools: ['Git', 'Postman', 'Figma', 'Webpack', 'Maven',]
-};
-
-const projects = [
-  {
-    title: 'Learning Management System',
-    subtitle: 'Role: Frontend Developer',
-    description: 'Comprehensive e-learning platform with dynamic course engine, anti-cheating mechanisms, and SCORM support for enterprise education.',
-    fe: ['ReactJS', 'JavaScript', 'Redux Toolkit', 'Ant Design', 'Axios'],
-    be: ['PHP (Laravel)', 'SQL Server', 'RESTful APIs'],
-    gradient: 'from-cyan-500 to-blue-600',
-    accent: 'cyan'
+const contentData = {
+  hero: {
+    badge: "Fullstack Developer",
+    title: "Engineering Scalable",
+    subtitle: "Solutions for Leading Enterprises.",
+    description: "Specializing in ReactJS Expert-level architecture & Java Spring Boot backends for enterprise-level applications.",
+    stats: [
+      { label: 'Years Exp.', value: '2+' },
+      { label: 'Enterprises', value: '4+' },
+      { label: 'Systems', value: '2+' },
+      { label: 'GPA', value: '3.13' }
+    ]
   },
-  {
-    title: 'Mentor & Coaching System',
-    subtitle: 'Role: Fullstack Developer',
-    description: 'Fullstack ownership platform with OAuth2/RBAC security and intelligent mentor-student matching logic for career development.',
-    fe: ['ReactJS', 'JavaScript', 'Redux Toolkit', 'Ant Design', 'Axios'],
-    be: ['Java', 'Spring Boot', 'Spring Security (OAuth2)', 'RESTful APIs', 'DTOs Pattern', 'MySQL'],
-    gradient: 'from-purple-500 to-pink-600',
-    accent: 'purple'
-  }
-];
+  about: {
+    title: "About Me",
+    paragraphs: [
+      "I'm a Fullstack Developer with 2+ years of experience building enterprise-level applications for Banking, Education, and Corporate sectors.",
+      "My technical philosophy focuses on clean code, system-wide perspective, and high-performance server-side solutions.",
+      "Currently seeking opportunities to architect scalable solutions for leading enterprises."
+    ],
+    info: [
+      { icon: GraduationCap, label: "Gia Dinh University", sublabel: "GPA: 3.13" },
+      { icon: MapPin, label: "Ho Chi Minh City, Vietnam", sublabel: "Available for relocation" },
+      { icon: Mail, label: "t.manh.tien2610@gmail.com", sublabel: "0785174058" }
+    ]
+  },
+  experience: {
+    title: "Professional Experience",
+    subtitle: "Building enterprise solutions for leading organizations in Vietnam",
+    jobs: [
+      {
+        company: "I TECHCO - VIETNAM",
+        role: "Frontend Developer",
+        period: "Aug 2024 - Feb 2026",
+        points: [
+          "Starting as a Frontend Developer I continuously learned and sharpened my technical skills, eventually taking on team lead responsibilities in company projects.",
+          "Designed and developed administrative dashboards featuring complex charts and reporting systems.",
+          "Optimized performance with Code Splitting & Lazy Loading for 40% faster load times.",
+          "Acted as a bridge between UI/UX and Backend teams to ensure seamless API integration and optimized data flow for production-grade applications."
+        ],
+        clients: ["ABBANK", "VUS", "HOASEN GROUP", "Dai-ichi Life"]
+      },
+      {
+        company: "Currently seeking for new opportunities and more challenges.",
+        role: "Fullstack Developer",
+        period: "???",
+        points: []
+      }
+    ]
+  },
+  projects: [
+    {
+      title: 'Learning Management System',
+      subtitle: 'Role: Frontend Developer',
+      description: 'Comprehensive e-learning platform with dynamic course engine, anti-cheating mechanisms, and SCORM support for enterprise education.',
+      fe: ['ReactJS', 'JavaScript', 'Redux Toolkit', 'Ant Design', 'Axios'],
+      be: ['PHP (Laravel)', 'SQL Server', 'RESTful APIs'],
+      gradient: 'from-cyan-500 to-blue-600',
+      accent: 'cyan'
+    },
+    {
+      title: 'Mentor & Coaching System',
+      subtitle: 'Role: Fullstack Developer',
+      description: 'Fullstack ownership platform with OAuth2/RBAC security and intelligent mentor-student matching logic for career development.',
+      fe: ['ReactJS', 'JavaScript', 'Redux Toolkit', 'Ant Design', 'Axios'],
+      be: ['Java', 'Spring Boot', 'Spring Security (OAuth2)', 'RESTful APIs', 'DTOs Pattern', 'MySQL'],
+      gradient: 'from-purple-500 to-pink-600',
+      accent: 'purple'
+    }
+  ],
+  skills: {
+    frontend: ['ReactJS', 'HTML', 'CSS', 'JavaScript (ES6+)', 'Redux Toolkit', 'Ant Design', 'Bootstrap'],
+    backend: ['RESTful API', 'Servlet & JSP', 'Java Core', 'Spring Framework', 'Spring Security', 'Spring Data JPA', 'JWT Authentication', 'ExpressJS'],
+    tools: ['Git', 'Postman', 'Figma', 'Webpack', 'Maven']
+  },
+  socialLinks: [
+    { icon: Linkedin, href: 'https://www.linkedin.com/in/manh-tien-tran-462956292/', label: 'LinkedIn' },
+    { icon: Github, href: 'https://github.com/tientm2610', label: 'GitHub' },
+    { icon: Mail, href: 'mailto:t.manh.tien2610@gmail.com', label: 'Email' }
+  ]
+};
 
-const clients = [
-  { name: 'ABBANK', color: 'bg-green-500' },
-  { name: 'VUS', color: 'bg-cyan-500' },
-  { name: 'HOASEN GROUP', color: 'bg-amber-500' },
-  { name: 'Dai-ichi Life', color: 'bg-blue-500' }
-];
+function SplitText({ text, className = "", delay = 0 }) {
+  const words = text.split(' ');
+  return (
+    <span className={className}>
+      {words.map((word, i) => (
+        <span key={i} className="inline-block overflow-hidden mr-[0.25em]">
+          {/* <span 
+            className="inline-block gsap-split-word"
+            style={{ 
+              display: 'inline-block',
+              willChange: 'transform, opacity'
+            }}
+          >
+          </span> */}
+            {word}
 
-const socialLinks = [
-  { icon: Linkedin, href: 'https://www.linkedin.com/in/manh-tien-tran-462956292/', label: 'LinkedIn' },
-  { icon: Github, href: 'https://github.com/tientm2610', label: 'GitHub' },
-  { icon: Mail, href: 'mailto:t.manh.tien2610@gmail.com', label: 'Email' }
-];
+        </span>
+      ))}
+    </span>
+  );
+}
 
-function App() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showCV, setShowCV] = useState(false);
+function HeroSection({ onOpenCV }) {
+  const heroRef = useRef(null);
+  const titleRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    setMounted(true);
   }, []);
 
-  const openCV = () => setShowCV(true);
-  const closeCV = () => setShowCV(false);
+  useGSAP(() => {
+    if (!mounted || !titleRef.current) return;
+
+    const words = titleRef.current.querySelectorAll('.gsap-split-word');
+    
+    gsap.fromTo(words, 
+      { y: 100, opacity: 0 },
+      { 
+        y: 0, 
+        opacity: 1,
+        duration: 1,
+        stagger: 0.1,
+        ease: "power4.out",
+        delay: 0.3
+      }
+    );
+
+    gsap.fromTo('.gsap-hero-content',
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.8, delay: 1.2, ease: "power3.out" }
+    );
+
+  }, [mounted]);
+
+  return (
+    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center px-4 pt-20 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.08)_0%,transparent_70%)] pointer-events-none" />
+      
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        className="max-w-5xl mx-auto relative z-10 text-center"
+      >
+        <motion.div variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }}} className="mb-6">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-400 text-sm font-medium tracking-wide">
+            <Zap size={14} />
+            {contentData.hero.badge}
+          </span>
+        </motion.div>
+        
+        <h1 ref={titleRef} className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
+          <SplitText text={contentData.hero.title} />
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-300 to-blue-500">
+            <SplitText text={contentData.hero.subtitle} />
+          </span>
+        </h1>
+
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="gsap-hero-content text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed"
+        >
+          {contentData.hero.description}
+        </motion.p>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.8 }}
+          className="gsap-hero-content flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+        >
+          <motion.button
+            onClick={onOpenCV}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-8 py-3.5 rounded-xl font-bold transition-all shadow-glow"
+          >
+            <Eye size={20} />
+            View My Full CV
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-medium border border-white/20 hover:border-cyan-400 hover:text-cyan-400 transition-all"
+          >
+            Explore My Work
+          </motion.button>
+        </motion.div>
+        
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="gsap-hero-content grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto"
+        >
+          {contentData.hero.stats.map((stat) => (
+            <div key={stat.label} className="glass-card p-4 rounded-xl">
+              <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-xs text-gray-500">{stat.label}</p>
+            </div>
+          ))}
+        </motion.div>
+        
+        <motion.div 
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="mt-16"
+        >
+          <ChevronDown className="mx-auto text-gray-500" size={32} />
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+function AboutSection() {
+  const sectionRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useGSAP(() => {
+    if (!sectionRef.current || !contentRef.current) return;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top center",
+        end: "bottom center",
+        toggleActions: "play none none reverse"
+      }
+    });
+
+    tl.fromTo(contentRef.current,
+      { y: 60, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+    );
+
+  }, []);
+
+  return (
+    <section id="about" ref={sectionRef} className="min-h-screen flex items-center justify-center py-24 px-4 relative">
+      <div className="absolute inset-0 bg-charcoal/30" />
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
+      
+      <div ref={contentRef} className="max-w-4xl mx-auto relative z-10 w-full">
+        <div className="text-center mb-12">
+          <h2 className="text-8xl sm:text-9xl font-black text-white/5 tracking-tighter uppercase leading-none">
+            About
+          </h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-[-1rem]">{contentData.about.title}</h2>
+        </div>
+
+        <div className="glass-card p-8 sm:p-12 rounded-3xl">
+          <div className="grid md:grid-cols-2 gap-12">
+            <div className="space-y-6 text-gray-300">
+              {contentData.about.paragraphs.map((p, i) => (
+                <p key={i} className="text-lg leading-relaxed">
+                  {p}
+                </p>
+              ))}
+            </div>
+            <div className="space-y-6">
+              {contentData.about.info.map((item, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                    <item.icon className="text-cyan-400" size={22} />
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">{item.label}</p>
+                    <p className="text-sm text-gray-500">{item.sublabel}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TimelineConnector() {
+  const pathRef = useRef(null);
+
+  useGSAP(() => {
+    if (!pathRef.current) return;
+
+    const path = pathRef.current;
+    const length = path.getTotalLength();
+
+    gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+
+    gsap.to(path, {
+      strokeDashoffset: 0,
+      duration: 2,
+      ease: "power2.inOut",
+      scrollTrigger: {
+        trigger: path,
+        start: "top 80%",
+        end: "bottom 80%",
+        scrub: 1
+      }
+    });
+  }, []);
+
+  return (
+    <svg className="absolute left-1/2 top-0 bottom-0 w-1 hidden md:block pointer-events-none" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="rgba(6,182,212,0.5)" />
+          <stop offset="50%" stopColor="rgba(168,85,247,0.5)" />
+          <stop offset="100%" stopColor="rgba(6,182,212,0.3)" />
+        </linearGradient>
+      </defs>
+      <path
+        ref={pathRef}
+        d="M 0 0 L 0 1000"
+        stroke="url(#timelineGradient)"
+        strokeWidth="2"
+        fill="none"
+        className="drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+      />
+    </svg>
+  );
+}
+
+function ExperienceSection() {
+  const sectionRef = useRef(null);
+  const titleRef = useRef(null);
+  const timelineRef = useRef(null);
+
+  useGSAP(() => {
+    if (!sectionRef.current || !titleRef.current) return;
+
+    gsap.fromTo(titleRef.current,
+      { y: 100, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse"
+        }
+      }
+    );
+
+    const jobs = timelineRef.current.querySelectorAll('.job-item');
+    jobs.forEach((job, i) => {
+      gsap.fromTo(job,
+        { x: i % 2 === 0 ? -50 : 50, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: job,
+            start: "top 85%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
+
+  }, []);
+
+  return (
+    <section id="experience" ref={sectionRef} className="min-h-screen py-24 px-4 relative overflow-hidden">
+      <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px] pointer-events-none" />
+      <AnimatedBlobSection />
+      
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div ref={titleRef} className="text-center mb-20">
+          <h2 className="text-8xl sm:text-9xl font-black text-white/5 tracking-tighter uppercase leading-none">
+            Experience
+          </h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-[-1rem]">{contentData.experience.title}</h2>
+          <p className="text-gray-400 mt-4 max-w-xl mx-auto">{contentData.experience.subtitle}</p>
+        </div>
+
+        <div ref={timelineRef} className="relative">
+          <TimelineConnector />
+
+          {contentData.experience.jobs.map((job, index) => (
+            <div 
+              key={index} 
+              className={`job-item relative mb-16 ${index === 1 ? 'md:ml-auto md:w-1/2' : 'md:mr-auto md:w-1/2'}`}
+            >
+              <div className="md:absolute md:top-0 hidden md:block" style={{ [index === 0 ? 'right' : 'left']: 'calc(50% + 2rem)' }}>
+                <div className="w-4 h-4 bg-cyan-400 rounded-full shadow-glow ring-4 ring-dark" />
+              </div>
+              
+              <div className={`glass-card p-6 sm:p-8 rounded-2xl ${index === 1 ? '' : 'md:mr-8'}`}>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white">{job.company}</h3>
+                    <p className="text-cyan-400 font-medium">{job.role}</p>
+                  </div>
+                  <span className="text-gray-500 text-sm bg-dark/50 px-3 py-1 rounded-full border border-white/10 self-start">
+                    {job.period}
+                  </span>
+                </div>
+                
+                {job.points.length > 0 && (
+                  <ul className="space-y-3 text-gray-400 mb-4">
+                    {job.points.map((point, i) => (
+                      <li key={i} className="flex gap-3">
+                        <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                
+                {job.clients && job.clients.length > 0 && (
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-xs text-gray-500 mb-2">Key Clients:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {job.clients.map((client) => (
+                        <span key={client} className="text-xs font-medium px-3 py-1 bg-dark rounded-full border border-white/10 text-gray-300">
+                          {client}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TiltCard({ children, className = "" }) {
+  const ref = useRef(null);
+  const [transform, setTransform] = useState({ rotateX: 0, rotateY: 0, scale: 1 });
+
+  const handleMouseMove = (e) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+    setTransform({ rotateX, rotateY, scale: 1.02 });
+  };
+
+  const handleMouseLeave = () => {
+    setTransform({ rotateX: 0, rotateY: 0, scale: 1 });
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ perspective: 1000 }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      viewport={{ once: true }}
+    >
+      <motion.div
+        style={{
+          transform: `rotateX(${transform.rotateX}deg) rotateY(${transform.rotateY}deg) scale(${transform.scale})`,
+          transformStyle: 'preserve-3d',
+          willChange: 'transform'
+        }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function ProjectsSection() {
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+
+  useGSAP(() => {
+    if (!sectionRef.current || !headerRef.current) return;
+
+    gsap.fromTo(headerRef.current,
+      { y: 80, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse"
+        }
+      }
+    );
+
+    const projects = sectionRef.current.querySelectorAll('.project-card');
+    projects.forEach((project, i) => {
+      const imageWrapper = project.querySelector('.project-image-wrapper');
+      const image = project.querySelector('.project-image');
+      
+      if (imageWrapper && image) {
+        gsap.fromTo(image,
+          { scale: 1.2 },
+          {
+            scale: 1,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: project,
+              start: "top 80%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+      }
+
+      gsap.fromTo(project,
+        { y: 80, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          delay: i * 0.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: project,
+            start: "top 90%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
+
+  }, []);
+
+  return (
+    <section id="projects" ref={sectionRef} className="min-h-screen py-24 px-4 relative">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.05)_0%,transparent_70%)" />
+      <AnimatedBlobSection />
+      
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div ref={headerRef} className="text-center mb-16">
+          <h2 className="text-7xl sm:text-8xl font-black text-white/[0.08] tracking-tighter uppercase leading-none">
+            Projects
+          </h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-[-0.5rem]">Projects Showcase</h2>
+          <p className="text-gray-400 max-w-xl mx-auto mt-4">
+            Enterprise-grade applications built with modern technologies and best practices
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {contentData.projects.map((project, index) => (
+            <TiltCard key={project.title} className="project-card group">
+              <div className="project-card-glass rounded-2xl overflow-hidden hover:border-white/20 transition-all hover:shadow-glow">
+                <div className="project-image-wrapper h-56 overflow-hidden relative">
+                  <div className={`project-image absolute inset-0 bg-gradient-to-br ${project.gradient}`} />
+                  <div className="absolute inset-0 bg-black/30" />
+                  <div className="absolute bottom-0 left-0 right-0 p-8 flex items-end">
+                    <div>
+                      <p className="text-white/80 text-sm font-medium mb-1">{project.subtitle}</p>
+                      <h3 className="text-2xl font-bold text-white">{project.title}</h3>
+                    </div>
+                  </div>
+                  <ExternalLink className="absolute top-6 right-6 text-white/60 group-hover:text-white transition-colors" size={24} />
+                </div>
+                
+                <div className="p-6 sm:p-8">
+                  <p className="text-gray-400 mb-6 leading-relaxed">
+                    {project.description}
+                  </p>
+                  
+                  <h4 className="text-lg font-bold text-white mb-3">Tech stack</h4>
+                  <div className="mb-4">
+                    <p className="text-cyan-400 text-sm mb-2">Frontend</p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.fe.map((tag) => (
+                        <span 
+                          key={tag} 
+                          className="text-xs font-mono px-3 py-1.5 bg-dark rounded-lg border border-white/10 text-gray-300"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-cyan-400 text-sm mb-2">Backend</p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.be.map((tag) => (
+                        <span 
+                          key={tag} 
+                          className="text-xs font-mono px-3 py-1.5 bg-dark rounded-lg border border-white/10 text-gray-300"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TiltCard>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SkillsSection() {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const categories = [
+      { title: 'Frontend', icon: Layout, skills: contentData.skills.frontend },
+      { title: 'Backend', icon: Server, skills: contentData.skills.backend },
+      { title: 'Tools & Others', icon: Settings, skills: contentData.skills.tools }
+    ];
+
+    categories.forEach((_, i) => {
+      const card = sectionRef.current.querySelectorAll('.skill-card')[i];
+      if (card) {
+        gsap.fromTo(card,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            delay: i * 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+      }
+    });
+
+  }, []);
+
+  const categories = [
+    { title: 'Frontend', icon: Layout, skills: contentData.skills.frontend, color: 'cyan' },
+    { title: 'Backend', icon: Server, skills: contentData.skills.backend, color: 'orange' },
+    { title: 'Tools & Others', icon: Settings, skills: contentData.skills.tools, color: 'purple' }
+  ];
+
+  return (
+    <section id="skills" ref={sectionRef} className="min-h-screen py-24 px-4 relative">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-7xl sm:text-8xl font-black text-white/[0.08] tracking-tighter uppercase">
+            Skills
+          </h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-[-0.5rem]">Technical Skill Vault</h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {categories.map((category) => (
+            <div
+              key={category.title}
+              className="skill-card glass-card p-6 rounded-2xl hover:border-white/20 transition-colors"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className={`w-12 h-12 rounded-xl bg-${category.color}-500/20 flex items-center justify-center`}>
+                  <category.icon className={`text-${category.color}-400`} size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white">{category.title}</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {category.skills.map((skill) => (
+                  <span 
+                    key={skill} 
+                    className="text-sm px-3 py-1.5 bg-dark/50 rounded-lg border border-white/10 text-gray-300 hover:border-white/20 transition-colors"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ContactSection() {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    gsap.fromTo(sectionRef.current,
+      { y: 40, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 90%",
+          toggleActions: "play none none reverse"
+        }
+      }
+    );
+
+  }, []);
+
+  return (
+    <section id="contact" ref={sectionRef} className="min-h-screen py-24 px-4 relative flex items-center justify-center">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-40 bg-cyan-500/5 blur-[100px] pointer-events-none" />
+      
+      <div className="max-w-4xl mx-auto text-center relative z-10">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">Let's Connect</h2>
+        <p className="text-gray-400 mb-10">
+          Open to new opportunities and collaborations
+        </p>
+        
+        <div className="flex justify-center flex-wrap gap-4 mb-12">
+          {contentData.socialLinks.map((social) => (
+            <motion.a
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noreferrer"
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-14 h-14 glass-card rounded-xl flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-400/30 transition-all"
+              title={social.label}
+            >
+              <social.icon size={24} />
+            </motion.a>
+          ))}
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-gray-500">
+          <a href="mailto:t.manh.tien2610@gmail.com" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
+            <Mail size={18} />
+            t.manh.tien2610@gmail.com
+          </a>
+          <a href="tel:0785174058" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
+            <Phone size={18} />
+            0785174058
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Navbar({ scrolled, onOpenCV }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -210,70 +1041,59 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-dark text-gray-200 font-sans selection:bg-cyan-500/30">
-      {/* Background Effects */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {backgroundEffect()}
-      </div>
+    <motion.nav 
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'glass-nav bg-dark/80 backdrop-blur-lg border-b border-white/5' 
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="text-xl font-bold tracking-tight text-white cursor-pointer"
+            onClick={() => window.scrollTo({top: 0,behavior: 'smooth'})}
+          >
+            <span className="text-cyan-400">Tien</span>tm<span className="text-cyan-400">.</span>
+          </motion.div>
 
-      {/* Sticky Navigation */}
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled 
-            ? 'glass-nav bg-dark/80 backdrop-blur-lg border-b border-white/5' 
-            : 'bg-transparent'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <motion.div 
-              whileHover={{ scale: 1.02 }}
-              className="text-xl font-bold tracking-tight text-white cursor-pointer"
-              onClick={() => window.scrollTo({top: 0,behavior: 'smooth'})}
-            >
-              <span className="text-cyan-400">Tien</span>tm<span className="text-cyan-400">.</span>
-            </motion.div>
-
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-8">
-              {['About', 'Experience', 'Skills', 'Projects', 'Contact'].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => scrollToSection(item.toLowerCase())}
-                  className="text-sm font-medium text-gray-400 hover:text-cyan-400 transition-colors relative group"
-                >
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 transition-all group-hover:w-full" />
-                </button>
-              ))}
-              <motion.button
-                onClick={openCV}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-glow"
+          <div className="hidden md:flex items-center gap-8">
+            {['About', 'Experience', 'Skills', 'Projects', 'Contact'].map((item) => (
+              <button
+                key={item}
+                onClick={() => scrollToSection(item.toLowerCase())}
+                className="text-sm font-medium text-gray-400 hover:text-cyan-400 transition-colors relative group"
               >
-                <Eye size={16} />
-                View CV
-              </motion.button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-400 hover:text-white"
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 transition-all group-hover:w-full" />
+              </button>
+            ))}
+            <motion.button
+              onClick={onOpenCV}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-glow"
             >
-              <div className="space-y-1.5">
-                <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-current transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-              </div>
-            </button>
+              <Eye size={16} />
+              View CV
+            </motion.button>
           </div>
+
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-gray-400 hover:text-white"
+          >
+            <div className="space-y-1.5">
+              <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+              <span className={`block w-6 h-0.5 bg-current transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            </div>
+          </button>
         </div>
 
-        {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -293,7 +1113,7 @@ function App() {
                   </button>
                 ))}
                 <button
-                  onClick={openCV}
+                  onClick={onOpenCV}
                   className="flex items-center gap-2 bg-cyan-500 text-dark px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <Eye size={16} />
@@ -303,478 +1123,52 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.nav>
+      </div>
+    </motion.nav>
+  );
+}
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 pt-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.08)_0%,transparent_70%)] pointer-events-none" />
-        
-        {/* Floating Tech Icons */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {techIcons.map((tech, index) => (
-            <motion.div
-              key={tech.label}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 0.15, scale: 1 }}
-              transition={{ delay: 0.5 + index * 0.2, duration: 0.8 }}
-              className={`absolute ${[
-                'left-[10%] top-[20%]',
-                'right-[15%] top-[25%]',
-                'left-[20%] bottom-[25%]',
-                'right-[10%] bottom-[20%]'
-              ][index]}`}
-            >
-              <tech.icon className={`${tech.color}`} size={48} />
-            </motion.div>
-          ))}
-        </div>
+function App() {
+  const [scrolled, setScrolled] = useState(false);
+  const [showCV, setShowCV] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-        <motion.div 
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="max-w-5xl mx-auto relative z-10 text-center"
-        >
-          <motion.div variants={fadeInUp} className="mb-6">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-400 text-sm font-medium tracking-wide">
-              <Zap size={14} />
-              Fullstack Developer
-            </span>
-          </motion.div>
-          
-          <motion.h1 
-            variants={fadeInUp}
-            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight"
-          >
-            Engineering Scalable
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-300 to-blue-500">
-              Solutions for Leading Enterprises.
-            </span>
-          </motion.h1>
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-          <motion.p 
-            variants={fadeInUp}
-            className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed"
-          >
-            Specializing in <span className="text-cyan-400 font-medium">ReactJS Expert-level architecture</span> & 
-            <span className="text-cyan-400 font-medium"> Java Spring Boot backends</span> for enterprise-level applications.
-          </motion.p>
-          
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <motion.button
-              onClick={openCV}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-8 py-3.5 rounded-xl font-bold transition-all shadow-glow"
-            >
-              <Eye size={20} />
-              View My Full CV
-            </motion.button>
-            <motion.button
-              onClick={() => scrollToSection('experience')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-medium border border-white/20 hover:border-cyan-400 hover:text-cyan-400 transition-all"
-            >
-              Explore My Work
-            </motion.button>
-          </motion.div>
-          
-          {/* Stats */}
-          <motion.div 
-            variants={fadeInUp}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto"
-          >
-            {[
-              { label: 'Years Exp.', value: '2+' },
-              { label: 'Enterprises', value: '4+' },
-              { label: 'Systems', value: '2+' },
-              { label: 'GPA', value: '3.13' }
-            ].map((stat, i) => (
-              <div key={stat.label} className="glass-card p-4 rounded-xl">
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs text-gray-500">{stat.label}</p>
-              </div>
-            ))}
-          </motion.div>
-          
-          {/* Scroll Indicator */}
-          <motion.div 
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="mt-16"
-          >
-            <ChevronDown className="mx-auto text-gray-500" size={32} />
-          </motion.div>
-        </motion.div>
-      </section>
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-      {/* About Section */}
-      <section id="about" className="py-24 px-4 bg-charcoal/30 relative">
-        <div className="max-w-4xl mx-auto relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">About Me</h2>
-          </motion.div>
+  const openCV = () => setShowCV(true);
+  const closeCV = () => setShowCV(false);
 
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="glass-card p-8 rounded-2xl"
-          >
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-4 text-gray-400">
-                <p>
-                  I'm a <span className="text-white font-semibold">Fullstack Developer</span> with 2+ years of experience building enterprise-level applications for Banking, Education, and Corporate sectors.
-                </p>
-                <p>
-                  My technical philosophy focuses on <span className="text-cyan-400">clean code</span>, <span className="text-cyan-400">system-wide perspective</span>, and <span className="text-cyan-400">high-performance server-side solutions</span>.
-                </p>
-                <p>
-                  Currently seeking opportunities to architect scalable solutions for leading enterprises.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 text-gray-400">
-                  <GraduationCap className="text-cyan-400" size={20} />
-                  <div>
-                    <p className="text-white font-medium">Gia Dinh University</p>
-                    <p className="text-sm">GPA: 3.13</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-gray-400">
-                  <MapPin className="text-cyan-400" size={20} />
-                  <div>
-                    <p className="text-white font-medium">Ho Chi Minh City, Vietnam</p>
-                    <p className="text-sm">Available for relocation</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-gray-400">
-                  <Mail className="text-cyan-400" size={20} />
-                  <div>
-                    <p className="text-white font-medium">t.manh.tien2610@gmail.com</p>
-                    <p className="text-sm">0785174058</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+  return (
+    <div className="min-h-screen bg-dark text-gray-200 font-sans selection:bg-cyan-500/30">
+      {!isMobile && <CustomCursor />}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {backgroundEffect()}
+      </div>
 
+      <Navbar scrolled={scrolled} onOpenCV={openCV} />
 
-      {/* Experience Section */}
-      <section id="experience" className="py-24 px-4 relative">
-        <div className="absolute top-1/2 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div className="max-w-5xl mx-auto relative z-10">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl sm:text-4xl font-bold mb-4 text-center text-white"
-          >
-            Professional Experience
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-gray-400 text-center mb-16 max-w-xl mx-auto"
-          >
-            Building enterprise solutions for leading organizations in Vietnam
-          </motion.p>
+      <HeroSection onOpenCV={openCV} />
+      <AboutSection />
+      <ExperienceSection />
+      <ProjectsSection />
+      <SkillsSection />
+      <ContactSection />
 
-          {/* Timeline */}
-          <div className="relative">
-            <div className="absolute left-4 sm:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-purple-500/50 to-transparent" />
-
-            {/* I Techco */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative pl-10 sm:pl-0 mb-12"
-            >
-              <div className="sm:absolute sm:left-1/2 sm:-translate-x-2 sm:mt-3">
-                <div className="w-4 h-4 bg-cyan-400 rounded-full shadow-glow ring-4 ring-dark" />
-              </div>
-              <div className="glass-card p-6 sm:p-8 rounded-2xl sm:mr-8 hover:border-cyan-400/30 transition-colors group">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-cyan-400 transition-colors">
-                      I TECHCO - VIETNAM
-                    </h3>
-                    <p className="text-cyan-400 font-medium">Frontend Developer</p>
-                  </div>
-                  <span className="text-gray-500 text-sm bg-dark/50 px-3 py-1 rounded-full border border-white/10 self-start">
-                    Aug 2024 - Feb 2026
-                  </span>
-                </div>
-                <ul className="space-y-3 text-gray-400">
-                  <li className="flex gap-3">
-                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
-                    <span>Starting as a <strong className="text-white">Frontend Developer</strong> I continuously learned and sharpened my technical skills, eventually taking on team lead
-responsibilities in company projects.</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
-                    <span>Designed and developed <strong className="text-white">administrative dashboards</strong> featuring <strong className="text-white">complex charts</strong> and reporting systems.</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
-                    <span>Optimized performance with <strong className="text-white">Code Splitting</strong> & <strong className="text-white">Lazy Loading</strong> for 40% faster load times.</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-cyan-400 mt-1 flex-shrink-0">▹</span>
-                    <span>Acted as a bridge between UI/UX and Backend teams to ensure seamless API integration and
-optimized data flow for production-grade applications.</span>
-                  </li>
-                  
-                </ul>
-                <div className="mt-4 pt-4 border-t border-white/5">
-                  <p className="text-xs text-gray-500 mb-2">Key Clients:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {clients.map((client) => (
-                      <span key={client.name} className="text-xs font-medium px-3 py-1 bg-dark rounded-full border border-white/10 text-gray-300">
-                        {client.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Earlier Experience */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative pl-10 sm:pl-0"
-            >
-              <div className="sm:absolute sm:left-1/2 sm:-translate-x-2 sm:mt-3">
-                <div className="w-4 h-4 bg-blue-500 rounded-full shadow-glow ring-4 ring-dark" />
-              </div>
-              <div className="glass-card p-6 sm:p-8 rounded-2xl sm:ml-8 hover:border-blue-500/30 transition-colors group">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                      Currently seeking for new opportunities and more challenges.
-                    </h3>
-                    <p className="text-blue-400 font-medium">Fullstack Developer</p>
-                  </div>
-                  <span className="text-gray-500 text-sm bg-dark/50 px-3 py-1 rounded-full border border-white/10 self-start">
-                    ???
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Skills Section */}
-      <section id="skills" className="py-24 px-4 relative">
-        <div className="max-w-6xl mx-auto relative z-10">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl sm:text-4xl font-bold mb-16 text-center text-white"
-          >
-            Technical Skill Vault
-          </motion.h2>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { title: 'Frontend', icon: Layout, skills: skills.frontend, color: 'cyan', gradient: 'from-cyan-500/20 to-transparent' },
-              { title: 'Backend', icon: Server, skills: skills.backend, color: 'orange', gradient: 'from-orange-500/20 to-transparent' },
-              { title: 'Tools & Others', icon: Settings, skills: skills.tools, color: 'purple', gradient: 'from-purple-500/20 to-transparent' }
-            ].map((category, index) => (
-              <motion.div
-                key={category.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass-card p-6 rounded-2xl hover:border-white/20 transition-colors group"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity`} />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-12 h-12 rounded-xl bg-${category.color}-500/20 flex items-center justify-center`}>
-                      <category.icon className={`text-${category.color}-400`} size={24} />
-                    </div>
-                    <h3 className="text-xl font-bold text-white">{category.title}</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {category.skills.map((skill) => (
-                      <span 
-                        key={skill} 
-                        className="text-sm px-3 py-1.5 bg-dark/50 rounded-lg border border-white/10 text-gray-300 hover:border-white/20 transition-colors"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-      {/* Projects Section */}
-      <section id="projects" className="py-24 px-4 bg-charcoal/30 relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.05)_0%,transparent_70%)]" />
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Projects Showcase</h2>
-            <p className="text-gray-400 max-w-xl mx-auto">
-              Enterprise-grade applications built with modern technologies and best practices
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            {projects.map((project, index) => (
-              <motion.div
-                key={project.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group"
-              >
-                <div className="glass-card rounded-2xl overflow-hidden hover:border-white/20 transition-all hover:shadow-glow">
-                  {/* Project Header */}
-                  <div className={`h-48 bg-gradient-to-br ${project.gradient} relative p-8 flex items-end`}>
-                    <div className="absolute inset-0 bg-black/30" />
-                    <div className="relative z-10">
-                      <p className="text-white/80 text-sm font-medium mb-1">{project.subtitle}</p>
-                      <h3 className="text-2xl font-bold text-white">{project.title}</h3>
-                    </div>
-                    <ExternalLink className="absolute top-6 right-6 text-white/60 group-hover:text-white transition-colors" size={24} />
-                  </div>
-                  
-                  {/* Project Content */}
-                  <div className="p-6 sm:p-8">
-                    <p className="text-gray-400 mb-6 leading-relaxed">
-                      {project.description}
-                    </p>
-                              <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <h2 className="text-cyan-400 font-medium mb-4">Tech stack</h2>
-          </motion.div>
-                    <h5 className="text-1xl sm:text-2xl font-bold text-white my-4">Frontend</h5>
-                    <div className="flex flex-wrap gap-2">
-                      {project.fe.map((tag) => (
-                        <span 
-                          key={tag} 
-                          className={`text-xs font-mono px-3 py-1.5 bg-dark rounded-lg border border-${project.accent}-400/20 text-${project.accent}-400`}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <h5 className="text-1xl sm:text-2xl font-bold text-white my-4">Backend</h5>
-                    <div className="flex flex-wrap gap-2">
-                      {project.be.map((tag) => (
-                        <span 
-                          key={tag} 
-                          className={`text-xs font-mono px-3 py-1.5 bg-dark rounded-lg border border-${project.accent}-400/20 text-${project.accent}-400`}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-24 px-4 relative">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-40 bg-cyan-500/5 blur-[100px] pointer-events-none" />
-        
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl sm:text-4xl font-bold mb-6 text-white"
-          >
-            Let's Connect
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-gray-400 mb-10"
-          >
-            Open to new opportunities and collaborations
-          </motion.p>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex justify-center flex-wrap gap-4 mb-12"
-          >
-            {socialLinks.map((social) => (
-              <motion.a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noreferrer"
-                whileHover={{ scale: 1.1, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-14 h-14 glass-card rounded-xl flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-400/30 transition-all"
-                title={social.label}
-              >
-                <social.icon size={24} />
-              </motion.a>
-            ))}
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6 text-gray-500"
-          >
-            <a href="mailto:t.manh.tien2610@gmail.com" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
-              <Mail size={18} />
-              t.manh.tien2610@gmail.com
-            </a>
-            <a href="tel:0785174058" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
-              <Phone size={18} />
-              0785174058
-            </a>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Footer */}
       <footer className="py-8 border-t border-white/10 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <p className="text-gray-500 text-sm">
@@ -783,7 +1177,6 @@ optimized data flow for production-grade applications.</span>
         </div>
       </footer>
 
-      {/* CV Modal Popup */}
       <AnimatePresence>
         {showCV && (
           <motion.div
@@ -800,7 +1193,6 @@ optimized data flow for production-grade applications.</span>
               className="relative w-full max-w-5xl h-[90vh] bg-dark rounded-2xl overflow-hidden shadow-2xl border border-white/10"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-charcoal/80">
                 <h3 className="text-lg font-bold text-white">Tran Manh Tien - CV</h3>
                 <div className="flex items-center gap-3">
@@ -822,8 +1214,6 @@ optimized data flow for production-grade applications.</span>
                   </button>
                 </div>
               </div>
-              
-              {/* PDF Viewer */}
               <div className="h-[calc(100%-65px)]">
                 <iframe
                   src={`${CVPDF}#toolbar=0&navpanes=0&scrollbar=0`}
