@@ -57,7 +57,7 @@ export function HeroSection({ onOpenCV }) {
 
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-center justify-center px-4 pt-20 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.08)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at center, var(--accent-glow) 0%, transparent 70%)' }} />
       
       <motion.div 
         initial="hidden"
@@ -65,7 +65,10 @@ export function HeroSection({ onOpenCV }) {
         className="max-w-5xl mx-auto relative z-10 text-center"
       >
         <motion.div variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }}} className="mb-6">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-400 text-sm font-medium tracking-wide">
+          <span 
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-medium tracking-wide"
+            style={{ borderColor: 'var(--accent-glow)', background: 'var(--accent-glow)', color: 'var(--accent-primary)' }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
@@ -73,19 +76,19 @@ export function HeroSection({ onOpenCV }) {
           </span>
         </motion.div>
         
-        <h1 ref={titleRef} className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
+        <h1 ref={titleRef} className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight" style={{ color: 'var(--text-primary)' }}>
           <SplitText text={contentData.hero.title} />
           <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-300 to-blue-500">
             <SplitText text={contentData.hero.subtitle} />
-          </span>
+
         </h1>
 
         <motion.p 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          className="gsap-hero-content text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed"
+          className="gsap-hero-content text-lg sm:text-xl max-w-2xl mx-auto mb-8 leading-relaxed"
+          style={{ color: 'var(--text-secondary)' }}
         >
           {contentData.hero.description}
         </motion.p>
@@ -100,7 +103,8 @@ export function HeroSection({ onOpenCV }) {
             onClick={onOpenCV}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-dark px-8 py-3.5 rounded-xl font-bold transition-all shadow-glow cursor-hover"
+            className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold transition-all shadow-glow cursor-hover"
+            style={{ background: 'var(--accent-primary)', color: 'var(--bg-main)' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -110,7 +114,12 @@ export function HeroSection({ onOpenCV }) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-medium border border-white/20 hover:border-cyan-400 hover:text-cyan-400 transition-all cursor-hover"
+            className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-medium border transition-all cursor-hover"
+            style={{ 
+              borderColor: 'var(--border-light)', 
+              color: 'var(--text-secondary)',
+              background: 'transparent'
+            }}
           >
             Explore My Work
           </motion.button>
@@ -124,8 +133,8 @@ export function HeroSection({ onOpenCV }) {
         >
           {contentData.hero.stats.map((stat) => (
             <div key={stat.label} className="glass-card p-4 rounded-xl">
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
             </div>
           ))}
         </motion.div>
@@ -135,7 +144,19 @@ export function HeroSection({ onOpenCV }) {
           transition={{ repeat: Infinity, duration: 2 }}
           className="mt-16"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-gray-500">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="32" 
+            height="32" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="mx-auto"
+            style={{ color: 'var(--text-muted)' }}
+          >
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </motion.div>

@@ -47,11 +47,11 @@ function ContactSection() {
 
   return (
     <section id="contact" ref={sectionRef} className="min-h-screen py-24 px-4 relative flex items-center justify-center">
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-40 bg-cyan-500/5 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-40 blur-[100px] pointer-events-none" style={{ background: 'var(--accent-glow)' }} />
       
       <div className="max-w-4xl mx-auto text-center relative z-10">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">Let's Connect</h2>
-        <p className="text-gray-400 mb-10">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Let's Connect</h2>
+        <p style={{ color: 'var(--text-secondary)' }} className="mb-10">
           Open to new opportunities and collaborations
         </p>
         
@@ -66,8 +66,9 @@ function ContactSection() {
                 rel="noreferrer"
                 whileHover={{ scale: 1.1, y: -5 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-14 h-14 glass-card rounded-xl flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-400/30 transition-all cursor-hover"
+                className="w-14 h-14 glass-card rounded-xl flex items-center justify-center transition-all cursor-hover"
                 title={social.label}
+                style={{ color: 'var(--text-secondary)' }}
               >
                 <IconComponent />
               </motion.a>
@@ -75,14 +76,14 @@ function ContactSection() {
           })}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-gray-500">
-          <a href="mailto:t.manh.tien2610@gmail.com" className="flex items-center gap-2 hover:text-cyan-400 transition-colors cursor-hover">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6" style={{ color: 'var(--text-muted)' }}>
+          <a href="mailto:t.manh.tien2610@gmail.com" className="flex items-center gap-2 hover:text-accent transition-colors cursor-hover" style={{ color: 'var(--text-muted)' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
             </svg>
             t.manh.tien2610@gmail.com
           </a>
-          <a href="tel:0785174058" className="flex items-center gap-2 hover:text-cyan-400 transition-colors cursor-hover">
+          <a href="tel:0785174058" className="flex items-center gap-2 hover:text-accent transition-colors cursor-hover" style={{ color: 'var(--text-muted)' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
             </svg>

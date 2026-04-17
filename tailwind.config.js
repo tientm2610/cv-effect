@@ -18,10 +18,10 @@ export default {
           muted: 'rgba(255, 255, 255, 0.4)',
           light: 'rgba(255, 255, 255, 0.6)',
         },
-        cyan: {
-          400: '#22d3ee',
-          500: '#06b6d4',
-          neon: '#00f3ff'
+        accent: {
+          DEFAULT: 'var(--accent-primary)',
+          secondary: 'var(--accent-secondary)',
+          soft: 'var(--accent-glow)',
         }
       },
       fontFamily: {
@@ -29,6 +29,9 @@ export default {
       },
       backdropBlur: {
         xs: '2px',
+      },
+      backgroundImage: {
+        'gradient-accent': 'linear-gradient(to right, var(--gradient-start), var(--gradient-end))',
       }
     },
   },

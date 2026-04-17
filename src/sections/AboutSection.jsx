@@ -46,20 +46,20 @@ export function AboutSection() {
 
   return (
     <section id="about" ref={sectionRef} className="min-h-screen flex items-center justify-center py-24 px-4 relative">
-      <div className="absolute inset-0 bg-charcoal/30" />
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0" style={{ background: 'var(--bg-surface)', opacity: 0.3 }} />
+      <div className="absolute top-1/2 left-0 w-96 h-96 rounded-full blur-[120px] pointer-events-none" style={{ background: 'var(--accent-glow)' }} />
       
       <div ref={contentRef} className="max-w-4xl mx-auto relative z-10 w-full">
         <div className="text-center mb-12">
-          <h2 className="text-8xl sm:text-9xl font-black text-white/5 tracking-tighter uppercase leading-none">
+          <h2 className="text-8xl sm:text-9xl font-black tracking-tighter uppercase leading-none" style={{ color: 'var(--text-primary)', opacity: 0.05 }}>
             About
           </h2>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-[-1rem]">{contentData.about.title}</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold" style={{ color: 'var(--text-primary)', marginTop: '-1rem' }}>{contentData.about.title}</h2>
         </div>
 
         <div className="glass-card p-8 sm:p-12 rounded-3xl">
           <div className="grid md:grid-cols-2 gap-12">
-            <div className="space-y-6 text-gray-300">
+            <div className="space-y-6" style={{ color: 'var(--text-secondary)' }}>
               {contentData.about.paragraphs.map((p, i) => (
                 <p key={i} className="text-lg leading-relaxed">
                   {p}
@@ -71,12 +71,12 @@ export function AboutSection() {
                 const IconComponent = icons[item.icon];
                 return (
                   <div key={i} className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-                      <IconComponent className="text-cyan-400" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--accent-glow)' }}>
+                      <IconComponent style={{ color: 'var(--accent-primary)' }} />
                     </div>
                     <div>
-                      <p className="text-white font-medium">{item.label}</p>
-                      <p className="text-sm text-gray-500">{item.sublabel}</p>
+                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{item.label}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{item.sublabel}</p>
                     </div>
                   </div>
                 );

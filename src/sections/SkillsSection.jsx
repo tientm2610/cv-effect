@@ -28,9 +28,9 @@ function SkillsSection() {
     if (!sectionRef.current) return;
 
     const categories = [
-      { title: 'Frontend', icon: 'Layout', skills: contentData.skills.frontend, color: 'cyan' },
-      { title: 'Backend', icon: 'Server', skills: contentData.skills.backend, color: 'orange' },
-      { title: 'Tools & Others', icon: 'Settings', skills: contentData.skills.tools, color: 'purple' }
+      { title: 'Frontend', icon: icons.Layout, skills: contentData.skills.frontend },
+      { title: 'Backend', icon: icons.Server, skills: contentData.skills.backend },
+      { title: 'Tools & Others', icon: icons.Settings, skills: contentData.skills.tools }
     ];
 
     categories.forEach((_, i) => {
@@ -57,38 +57,43 @@ function SkillsSection() {
   }, []);
 
   const categories = [
-    { title: 'Frontend', icon: icons.Layout, skills: contentData.skills.frontend, color: 'cyan' },
-    { title: 'Backend', icon: icons.Server, skills: contentData.skills.backend, color: 'orange' },
-    { title: 'Tools & Others', icon: icons.Settings, skills: contentData.skills.tools, color: 'purple' }
+    { title: 'Frontend', icon: icons.Layout, skills: contentData.skills.frontend },
+    { title: 'Backend', icon: icons.Server, skills: contentData.skills.backend },
+    { title: 'Tools & Others', icon: icons.Settings, skills: contentData.skills.tools }
   ];
 
   return (
     <section id="skills" ref={sectionRef} className="min-h-screen py-24 px-4 relative">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-7xl sm:text-8xl font-black text-white/[0.08] tracking-tighter uppercase">
+          <h2 className="text-7xl sm:text-8xl font-black tracking-tighter uppercase" style={{ color: 'var(--text-primary)', opacity: 0.08 }}>
             Skills
           </h2>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-[-0.5rem]">Technical Skill Vault</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold" style={{ color: 'var(--text-primary)', marginTop: '-0.5rem' }}>Technical Skill Vault</h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
           {categories.map((category) => (
             <div
               key={category.title}
-              className="skill-card glass-card p-6 rounded-2xl hover:border-white/20 transition-colors"
+              className="skill-card glass-card p-6 rounded-2xl transition-colors"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className={`w-12 h-12 rounded-xl bg-${category.color}-500/20 flex items-center justify-center`}>
-                  <category.icon className={`text-${category.color}-400`} />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--accent-glow)' }}>
+                  <category.icon style={{ color: 'var(--accent-primary)' }} />
                 </div>
-                <h3 className="text-xl font-bold text-white">{category.title}</h3>
+                <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{category.title}</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {category.skills.map((skill) => (
                   <span 
                     key={skill} 
-                    className="text-sm px-3 py-1.5 bg-dark/50 rounded-lg border border-white/10 text-gray-300 hover:border-white/20 transition-colors"
+                    className="text-sm px-3 py-1.5 rounded-lg border transition-colors"
+                    style={{ 
+                      background: 'var(--bg-surface)', 
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-secondary)'
+                    }}
                   >
                     {skill}
                   </span>

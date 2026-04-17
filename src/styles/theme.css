@@ -1,0 +1,84 @@
+:root {
+  /* Default Dark (Space) Mode */
+  --accent-primary: #22d3ee;
+  --accent-secondary: #06b6d4;
+  --accent-glow: rgba(34, 211, 238, 0.25);
+  
+  --bg-main: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-elevated: #121212;
+  --bg-card: rgba(18, 18, 18, 0.6);
+  
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.1);
+  
+  --gradient-start: rgba(6, 182, 212, 0.4);
+  --gradient-end: rgba(168, 85, 247, 0.4);
+  
+  /* Glass effect */
+  --glass-bg: rgba(18, 18, 18, 0.6);
+  --glass-blur: 12px;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  
+  /* Text gradients */
+  --text-gradient-start: var(--accent-primary);
+  --text-gradient-end: var(--accent-secondary);
+  
+  /* Transition timing */
+  --transition-theme: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-mode="dark"] {
+  --bg-main: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-elevated: #121212;
+  --bg-card: rgba(18, 18, 18, 0.6);
+  
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.1);
+  
+  --glass-bg: rgba(18, 18, 18, 0.6);
+  --glass-blur: 12px;
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+[data-mode="light"] {
+  --bg-main: #f8fafc;
+  --bg-surface: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  
+  --text-primary: rgba(15, 23, 42, 0.9);
+  --text-secondary: rgba(15, 23, 42, 0.7);
+  --text-muted: rgba(15, 23, 42, 0.5);
+  
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-light: rgba(0, 0, 0, 0.1);
+  
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-blur: 16px;
+  --glass-border: rgba(0, 0, 0, 0.08);
+  
+  --gradient-start: var(--accent-primary);
+  --gradient-end: var(--accent-secondary);
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  transition: background var(--transition-theme), color var(--transition-theme);
+}
+
+/* Re-export as Tailwind-compatible classes */
+.dark {
+  --bg-main: #000000;
+  --accent-primary: #22d3ee;
+}
