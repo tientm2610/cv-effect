@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export function Header({ scrolled, onOpenCV }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const scrollToSection = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setMobileMenuOpen(false);
-    }
-  };
+export function Header({ scrolled, onOpenCV, mobileMenuOpen, setMobileMenuOpen, scrollToSection }) {
 
   const navItems = ['About', 'Experience', 'Projects',  'Skills', 'Contact'];
 
@@ -49,7 +40,7 @@ export function Header({ scrolled, onOpenCV }) {
               onClick={onOpenCV}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 rounded-lg font-semibold text-sm transition-all shadow-glow cursor-hover"
+              className="flex items-center gap-2 p-2 rounded-lg font-semibold text-sm transition-all shadow-glow cursor-hover"
               style={{ background: 'var(--accent-primary)', color: 'var(--bg-main)' }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

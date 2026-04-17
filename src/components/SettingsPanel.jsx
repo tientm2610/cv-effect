@@ -157,30 +157,6 @@ function SettingsPanel() {
               </div>
             </div>
             
-            <div>
-              <label className="text-sm mb-2 block" style={{ color: 'var(--text-secondary)' }}>
-                Weather
-              </label>
-              <div className="flex gap-2">
-                {weathers.map(w => (
-                  <button
-                    key={w.value}
-                    onClick={() => setWeather(w.value)}
-                    className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-hover ${
-                      theme.weather === w.value 
-                        ? 'ring-2 ring-[var(--accent-primary)]' 
-                        : ''
-                    }`}
-                    style={{ 
-                      background: theme.weather === w.value ? 'var(--accent-glow)' : 'var(--bg-surface)',
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    {w.name}
-                  </button>
-                ))}
-              </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -22,7 +22,7 @@ function SplitText({ text, className = "" }) {
   );
 }
 
-export function HeroSection({ onOpenCV }) {
+export function HeroSection({ onOpenCV, mobileMenuOpen, setMobileMenuOpen, scrollToSection }) {
   const heroRef = useRef(null);
   const titleRef = useRef(null);
   const [mounted, setMounted] = useState(false);
@@ -112,6 +112,8 @@ export function HeroSection({ onOpenCV }) {
             View My Full CV
           </motion.button>
           <motion.button
+            key={'Experience'}
+            onClick={() => scrollToSection('Experience'.toLowerCase())}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-medium border transition-all cursor-hover"
